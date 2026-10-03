@@ -1,3 +1,8 @@
+---
+title: Node reference
+nav_order: 4
+---
+
 # Node reference
 
 A pipeline is a chain of nodes. Each node takes what the node before it made, does one thing to

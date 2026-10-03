@@ -11,11 +11,14 @@ node shows the image it produces, so each layer of the pipeline is visible, and 
 effect on the next frame. The studio runs only when it is started; a robot that does not start it
 runs the pipeline alone.
 
+Documentation: <https://robowolves10016.github.io/WolfVision/>
+
 ## Modules
 
 | Module    | Contents                                                           |
 | --------- | ------------------------------------------------------------------ |
 | `engine`  | Graphs, nodes and the runtime. Kotlin and OpenCV, no Android code. |
+| `ftc`     | Android library for robot projects: a `VisionProcessor`.           |
 | `studio`  | The dashboard: a small web server and the editor page.             |
 | `desktop` | Runs a pipeline and the studio on a laptop. Not published.         |
 
@@ -25,51 +28,25 @@ runs the pipeline alone.
 ./gradlew :desktop:run
 ```
 
-Then open <http://localhost:5800/>. The pipeline is saved in `desktop/data.nosync/pipeline.json`.
+Then open <http://localhost:5800/>. See [On a laptop](docs/laptop.md) for using a webcam.
 
-The source of frames is the second argument:
+## Use it on a robot
 
 ```
-./gradlew :desktop:installDist
-desktop/build.nosync/install/desktop/bin/desktop pipeline.json demo        # moving shapes
-desktop/build.nosync/install/desktop/bin/desktop pipeline.json camera:0    # a webcam
-desktop/build.nosync/install/desktop/bin/desktop pipeline.json photos/     # a folder of images
+./gradlew publishToMavenLocal
 ```
 
-## Using a pipeline
+Then add `io.github.robowolves10016:wolfvision-ftc:0.1.0` to the robot project. See
+[On a robot](docs/robot.md) and [The studio](docs/studio.md).
 
-```java
-WolfVision vision = WolfVision.load(new File("pipeline.json"));
-vision.require("target"); // fails here if the graph has no output named "target"
+## Building
 
-// For every camera frame, in RGB:
-vision.process(frame);
-
-Detection target = vision.detection("target");
-if (target != null) {
-    double x = target.getX();
-}
-```
-
-Outputs are named by the Output nodes of the graph. A number is read with `number(name)`;
-anything else is read with `detection(name)` or `detections(name)`.
-
-What each node does, with example images, is in the [node reference](docs/nodes.md).
-
-## Starting the studio
-
-```java
-Studio studio = Studio.start(vision); // port 5800
-...
-studio.stop();
-```
-
-The studio copies an image only for a node that a browser is watching.
+The `ftc` module needs the Android SDK: set `sdk.dir` in `local.properties` or `ANDROID_HOME`.
 
 ## Status
 
-The engine, the studio and the desktop runner work. The Android module that plugs a pipeline into
-the FTC SDK's `VisionPortal` is not written yet, and nothing has run on a Control Hub.
+Version 0.1.0 is built against FTC SDK 12.0.0 and has been run on a laptop. It has not yet been
+validated on a Control Hub.
 
 ## Licence
 
