@@ -39,12 +39,12 @@ private const val STARTER =
     "params": { "min": [20, 100, 100], "max": [35, 255, 255] }, "in": ["hsv"], "x": 500, "y": 40 },
   { "id": "clean", "type": "Morphology", "params": { "op": "open", "size": 5 }, "in": ["mask"],
     "x": 740, "y": 40 },
-  { "id": "blobs", "type": "FindContours", "in": ["clean"], "x": 20, "y": 420 },
-  { "id": "best", "type": "Largest", "in": ["blobs"], "x": 260, "y": 420 },
+  { "id": "blobs", "type": "FindContours", "in": ["clean"], "x": 20, "y": 560 },
+  { "id": "best", "type": "Largest", "in": ["blobs"], "x": 260, "y": 560 },
   { "id": "box", "type": "Boxes", "params": { "kind": "rotated" }, "in": ["best"],
-    "x": 500, "y": 420 },
+    "x": 500, "y": 560 },
   { "id": "target", "type": "Output", "params": { "name": "target" }, "in": ["box"],
-    "x": 740, "y": 420 }
+    "x": 740, "y": 560 }
 ] }
 """
 

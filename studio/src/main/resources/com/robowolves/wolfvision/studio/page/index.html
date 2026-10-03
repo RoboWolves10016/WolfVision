@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WolfVision Studio</title>
+    <link rel="stylesheet" href="studio.css" />
+  </head>
+  <body>
+    <header>
+      <h1>WolfVision Studio</h1>
+      <span id="file"></span>
+      <span id="stats"></span>
+      <span class="spacer"></span>
+      <label><input type="checkbox" id="thumbs" checked /> Thumbnails</label>
+      <button id="open">Open…</button>
+      <a id="download" href="/api/graph" download="pipeline.json">Download</a>
+      <button id="save">Save</button>
+      <input type="file" id="openFile" accept=".json,application/json" hidden />
+    </header>
+    <div id="banner" hidden></div>
+    <main>
+      <nav id="palette"></nav>
+      <section id="canvas">
+        <div id="world">
+          <svg id="wires"></svg>
+        </div>
+      </section>
+      <aside>
+        <h2 id="viewerTitle">Select a node</h2>
+        <div id="viewerBox"><img id="viewer" alt="" /></div>
+        <p id="hint"></p>
+        <h2>Outputs</h2>
+        <div id="results"></div>
+      </aside>
+    </main>
+    <script src="studio.js"></script>
+  </body>
+</html>

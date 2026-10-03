@@ -1,0 +1,336 @@
+/*
+ * Copyright (c) 2026 Clarkston RoboWolves 10016
+ * SPDX-License-Identifier: MIT
+ */
+
+:root {
+  --bg: #14171c;
+  --panel: #1c2027;
+  --node: #252a33;
+  --line: #363d49;
+  --text: #e3e7ee;
+  --dim: #8d97a8;
+  --accent: #4da3ff;
+  --bad: #ff6b6b;
+  --IMAGE: #4da3ff;
+  --MASK: #d5dbe6;
+  --CONTOURS: #5fd38d;
+  --DETECTIONS: #f5b942;
+  --NUMBER: #c58bff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    13px/1.4 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  margin: 0;
+  font-size: 15px;
+}
+
+h2 {
+  margin: 12px 0 6px;
+  font-size: 12px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.spacer {
+  flex: 1;
+}
+
+#file,
+#stats {
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+button,
+header a {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--node);
+  color: var(--text);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:hover,
+header a:hover {
+  border-color: var(--accent);
+}
+
+#banner {
+  padding: 6px 12px;
+  background: #4a2226;
+  color: #ffd0d0;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+#palette {
+  width: 170px;
+  padding: 0 10px 10px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+}
+
+#palette button {
+  display: block;
+  width: 100%;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+#canvas {
+  flex: 1;
+  overflow: auto;
+  min-width: 0;
+}
+
+#world {
+  position: relative;
+  width: 3200px;
+  height: 2200px;
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+#wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#wires path {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+aside {
+  width: 400px;
+  padding: 0 12px 12px;
+  overflow-y: auto;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+
+#viewerBox {
+  min-height: 120px;
+  background: #000;
+  border: 1px solid var(--line);
+}
+
+#viewer {
+  display: block;
+  width: 100%;
+}
+
+#viewer.pick {
+  cursor: crosshair;
+}
+
+#hint {
+  min-height: 1.4em;
+  margin: 6px 0 0;
+  color: var(--dim);
+}
+
+#results {
+  font-variant-numeric: tabular-nums;
+}
+
+#results div {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#results b {
+  color: var(--accent);
+}
+
+.node {
+  position: absolute;
+  width: 210px;
+  background: var(--node);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.node.selected {
+  border-color: var(--accent);
+}
+
+.node.bad {
+  border-color: var(--bad);
+}
+
+.node.inactive {
+  opacity: 0.6;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--line);
+  cursor: grab;
+  user-select: none;
+}
+
+.head b {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.head button {
+  padding: 0 6px;
+  border: 0;
+  background: none;
+  color: var(--dim);
+}
+
+.ports {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.port {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--dim);
+  cursor: pointer;
+}
+
+.port i {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--dim);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.port.in i {
+  margin-left: -7px;
+}
+
+.port.out i {
+  margin-right: -7px;
+  cursor: crosshair;
+}
+
+.port.on i {
+  background: currentColor;
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  background: #000;
+}
+
+.thumb.none {
+  display: none;
+}
+
+.params {
+  padding: 4px 8px;
+}
+
+.param {
+  display: grid;
+  grid-template-columns: 70px 1fr 54px;
+  align-items: center;
+  gap: 4px;
+  margin: 3px 0;
+}
+
+.param > span {
+  overflow: hidden;
+  color: var(--dim);
+  text-overflow: ellipsis;
+}
+
+.param input[type="range"] {
+  width: 100%;
+  min-width: 0;
+}
+
+.param input[type="number"],
+.param input[type="text"],
+.param select {
+  width: 100%;
+  min-width: 0;
+  padding: 2px 4px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.param .wide {
+  grid-column: 2 / 4;
+}
+
+.params > button {
+  width: 100%;
+  margin: 3px 0;
+}
+
+.params > button.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 8px;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
