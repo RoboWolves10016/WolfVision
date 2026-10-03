@@ -14,6 +14,15 @@ application {
     mainClass = 'com.robowolves.wolfvision.desktop.MainKt'
 }
 
+// Regenerates the example images of docs/nodes.md by running the real nodes.
+tasks.register('docImages', JavaExec) {
+    group = 'documentation'
+    description = 'Writes the example images of the node reference.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.robowolves.wolfvision.desktop.DocImagesKt'
+    args rootProject.file('docs/images/nodes').path
+}
+
 run {
     args rootProject.file('desktop/data.nosync/pipeline.json').path, 'demo'
 }

@@ -328,6 +328,15 @@ aside {
   font: inherit;
 }
 
+.group {
+  margin: 6px 0 0;
+  font-weight: 600;
+}
+
+.group:empty {
+  display: none;
+}
+
 .param .wide {
   grid-column: 2 / 4;
 }

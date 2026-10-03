@@ -54,6 +54,8 @@ if (target != null) {
 Outputs are named by the Output nodes of the graph. A number is read with `number(name)`;
 anything else is read with `detection(name)` or `detections(name)`.
 
+What each node does, with example images, is in the [node reference](docs/nodes.md).
+
 ## Starting the studio
 
 ```java

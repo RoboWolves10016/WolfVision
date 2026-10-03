@@ -46,6 +46,7 @@ async function api(path, options) {
 // ---- Sending the graph to the robot ----
 
 function schedulePush() {
+  refreshChannels();
   clearTimeout(pushTimer);
   pushTimer = setTimeout(push, 60);
 }
@@ -133,6 +134,7 @@ function render() {
       world.append(element);
     }
   }
+  refreshChannels();
   drawWires();
   showProblems();
 }
@@ -225,7 +227,10 @@ function buildParams(node, container) {
     schedulePush();
   };
 
+  if (node.type === "Threshold") buildRanges(node, container, spec, value, set);
+
   for (const param of spec.params) {
+    if (param.kind === "TRIPLE" && node.type === "Threshold") continue;
     if (param.kind === "TRIPLE") {
       ["1", "2", "3"].forEach((label, c) => {
         const row = make("label", "param");
@@ -294,6 +299,8 @@ function buildParams(node, container) {
     container.append(row);
   }
 
+  if (node.type === "Channel") container.append(make("div", "group channelName"));
+
   if (node.type === "Threshold") {
     const pick = make("button", "pickButton", "Pick from image");
     pick.addEventListener("click", (event) => {
@@ -304,6 +311,109 @@ function buildParams(node, container) {
     });
     pick.addEventListener("pointerdown", (event) => event.stopPropagation());
     container.append(pick);
+  }
+}
+
+/** The channels of each colour space: the name of each and its greatest value. */
+const SPACES = {
+  RGB: [
+    ["Red", 255],
+    ["Green", 255],
+    ["Blue", 255],
+  ],
+  HSV: [
+    ["Hue", 179],
+    ["Saturation", 255],
+    ["Value (brightness)", 255],
+  ],
+  YCrCb: [
+    ["Y (brightness)", 255],
+    ["Cr (redness)", 255],
+    ["Cb (blueness)", 255],
+  ],
+  Lab: [
+    ["L (lightness)", 255],
+    ["a (green to red)", 255],
+    ["b (blue to yellow)", 255],
+  ],
+  Gray: [["Brightness", 255]],
+};
+
+const UNKNOWN_CHANNELS = [
+  ["Channel 1", 255],
+  ["Channel 2", 255],
+  ["Channel 3", 255],
+];
+
+/** Returns the channels of the image a node gives, or null if they cannot be told. */
+function channelsOf(id, depth = 0) {
+  const node = id && nodeById(id);
+  if (!node || depth > 100) return null;
+  const setting = (name) => {
+    const param = specs[node.type].params.find((p) => p.name === name);
+    return name in node.params ? node.params[name] : param.default;
+  };
+  switch (node.type) {
+    case "Camera":
+      return SPACES.RGB;
+    case "ConvertColor":
+      return SPACES[setting("to")] || null;
+    case "Channel": {
+      const from = channelsOf(node.in[0], depth + 1);
+      return from ? [from[Math.min(setting("channel"), from.length - 1)]] : null;
+    }
+    case "Blur":
+    case "Region":
+    case "ApplyMask":
+      return channelsOf(node.in[0], depth + 1);
+    default:
+      return specs[node.type].output === "MASK" ? [["White", 255]] : null;
+  }
+}
+
+/** Builds the sliders of a Threshold node: a least and greatest value for each channel. */
+function buildRanges(node, container, spec, value, set) {
+  const channels = channelsOf(node.in[0]) || UNKNOWN_CHANNELS;
+  container.dataset.channels = channels.map((channel) => channel[0]).join();
+  const min = spec.params.find((param) => param.name === "min");
+  const max = spec.params.find((param) => param.name === "max");
+  channels.forEach(([name, top], c) => {
+    container.append(make("div", "group", name));
+    for (const param of [min, max]) {
+      const row = make("label", "param");
+      const slider = make("input");
+      slider.type = "range";
+      slider.min = 0;
+      slider.max = top;
+      slider.value = value(param)[c];
+      const shown = make("span", "", String(value(param)[c]));
+      slider.addEventListener("input", () => {
+        const triple = value(param).slice();
+        triple[c] = Number(slider.value);
+        shown.textContent = slider.value;
+        set(param, triple);
+      });
+      row.append(make("span", "", param.name), slider, shown);
+      container.append(row);
+    }
+  });
+}
+
+/** Renames the channels shown on Threshold and Channel nodes after a change upstream. */
+function refreshChannels() {
+  for (const node of graph.nodes) {
+    const element = elements.get(node.id);
+    if (!element) continue;
+    const params = element.querySelector(".params");
+    if (node.type === "Threshold") {
+      const channels = channelsOf(node.in[0]) || UNKNOWN_CHANNELS;
+      if (params.dataset.channels !== channels.map((channel) => channel[0]).join()) {
+        buildParams(node, params);
+      }
+    } else if (node.type === "Channel") {
+      const channels = channelsOf(node.id);
+      params.querySelector(".channelName").textContent = channels ? channels[0][0] : "";
+    }
   }
 }
 
