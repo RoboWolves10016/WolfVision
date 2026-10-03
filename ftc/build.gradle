@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.vanniktech.maven.publish'
+}
+
+android {
+    namespace = 'com.robowolves.wolfvision.ftc'
+    compileSdk 34
+
+    defaultConfig {
+        minSdkVersion 24
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+    }
+}
+
+dependencies {
+    api project(':engine')
+
+    // Provided by the robot controller app at runtime. Vision brings OpenCV with it.
+    compileOnly "org.firstinspires.ftc:RobotCore:$ftcVersion"
+    compileOnly "org.firstinspires.ftc:Vision:$ftcVersion"
+
+    // The sample OpModes of the documentation are compiled as tests, so that they stay correct.
+    testImplementation project(':studio')
+    testImplementation "org.firstinspires.ftc:RobotCore:$ftcVersion"
+    testImplementation "org.firstinspires.ftc:Vision:$ftcVersion"
+}
+
+mavenPublishing {
+    coordinates(project.group.toString(), 'wolfvision-ftc', project.version.toString())
+    pom {
+        name = 'WolfVision'
+        description = 'Vision pipelines for FTC robots, built without writing code.'
+    }
+}

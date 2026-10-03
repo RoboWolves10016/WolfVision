@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm'
+    id 'com.vanniktech.maven.publish'
 }
 
 dependencies {
@@ -15,4 +16,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+mavenPublishing {
+    coordinates(project.group.toString(), 'wolfvision-engine', project.version.toString())
+    pom {
+        name = 'WolfVision Engine'
+        description = 'Pipeline graphs, nodes and the runtime of WolfVision. Robot projects depend on wolfvision-ftc.'
+    }
 }

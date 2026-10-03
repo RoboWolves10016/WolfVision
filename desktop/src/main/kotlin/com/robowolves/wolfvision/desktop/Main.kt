@@ -5,6 +5,7 @@
 
 package com.robowolves.wolfvision.desktop
 
+import com.robowolves.wolfvision.StarterPipeline
 import com.robowolves.wolfvision.WolfVision
 import com.robowolves.wolfvision.studio.Studio
 import java.io.File
@@ -29,24 +30,6 @@ private const val USAGE =
           camera or camera:<index>: a camera of this computer
           a path to an image, or to a folder of images shown in turn
   port    the port of the studio; 5800 by default"""
-
-private const val STARTER =
-    """{ "version": 1, "nodes": [
-  { "id": "camera", "type": "Camera", "x": 20, "y": 40 },
-  { "id": "hsv", "type": "ConvertColor", "params": { "to": "HSV" }, "in": ["camera"],
-    "x": 260, "y": 40 },
-  { "id": "mask", "type": "Threshold",
-    "params": { "min": [20, 100, 100], "max": [35, 255, 255] }, "in": ["hsv"], "x": 500, "y": 40 },
-  { "id": "clean", "type": "Morphology", "params": { "op": "open", "size": 5 }, "in": ["mask"],
-    "x": 740, "y": 40 },
-  { "id": "blobs", "type": "FindContours", "in": ["clean"], "x": 20, "y": 560 },
-  { "id": "best", "type": "Largest", "in": ["blobs"], "x": 260, "y": 560 },
-  { "id": "box", "type": "Boxes", "params": { "kind": "rotated" }, "in": ["best"],
-    "x": 500, "y": 560 },
-  { "id": "target", "type": "Output", "params": { "name": "target" }, "in": ["box"],
-    "x": 740, "y": 560 }
-] }
-"""
 
 /** Supplies frames in RGB order. */
 private interface Source {
@@ -143,7 +126,7 @@ fun main(args: Array<String>) {
     val file = File(args[0])
     if (!file.exists()) {
         file.absoluteFile.parentFile?.mkdirs()
-        file.writeText(STARTER)
+        file.writeText(StarterPipeline.JSON)
         println("Created $file with a starter pipeline")
     }
     val sourceName = args.getOrElse(1) { "demo" }

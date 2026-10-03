@@ -33,10 +33,10 @@ class Studio
 private constructor(
     private val vision: WolfVision,
     private val registry: NodeRegistry,
-    port: Int,
+    private val requestedPort: Int,
 ) {
     private val previews = Previews()
-    private val server = Server(port)
+    private val server = Server(requestedPort)
 
     /** The port the studio listens on. */
     val port: Int
@@ -44,6 +44,7 @@ private constructor(
 
     /** Stops the server and detaches the studio from the pipeline. */
     fun stop() {
+        synchronized(running) { if (running[requestedPort] === this) running.remove(requestedPort) }
         server.stop()
         if (vision.tap === previews) vision.tap = null
         previews.release()
@@ -264,9 +265,11 @@ private constructor(
 
         private const val MAX_BODY = 1 shl 20
         private val SAFE_NAME = Regex("[A-Za-z0-9][A-Za-z0-9._-]*")
+        private val running = HashMap<Int, Studio>()
 
         /**
-         * Starts the studio of a pipeline.
+         * Starts the studio of a pipeline. A studio already running on the port, such as one an
+         * earlier OpMode did not stop, is stopped first.
          *
          * @param vision the pipeline to edit and watch.
          * @param port the port to listen on.
@@ -282,10 +285,14 @@ private constructor(
             port: Int = DEFAULT_PORT,
             registry: NodeRegistry = NodeRegistry.standard(),
         ): Studio {
-            val studio = Studio(vision, registry, port)
-            studio.server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, true)
-            vision.tap = studio.previews
-            return studio
+            synchronized(running) {
+                running[port]?.stop()
+                val studio = Studio(vision, registry, port)
+                studio.server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, true)
+                vision.tap = studio.previews
+                running[port] = studio
+                return studio
+            }
         }
     }
 }
