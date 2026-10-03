@@ -12,7 +12,13 @@
       <span id="file"></span>
       <span id="stats"></span>
       <span class="spacer"></span>
+      <span class="zoom">
+        <button id="zoomOut" title="Zoom out">−</button>
+        <button id="zoomReset" title="Reset zoom">100%</button>
+        <button id="zoomIn" title="Zoom in">+</button>
+      </span>
       <label><input type="checkbox" id="thumbs" checked /> Thumbnails</label>
+      <button id="togglePreview" title="Show or hide the preview and outputs">Preview</button>
       <button id="open">Open…</button>
       <a id="download" href="/api/graph" download="pipeline.json">Download</a>
       <button id="save">Save</button>
@@ -26,7 +32,7 @@
           <svg id="wires"></svg>
         </div>
       </section>
-      <aside>
+      <aside hidden>
         <h2 id="viewerTitle">Select a node</h2>
         <div id="viewerBox"><img id="viewer" alt="" /></div>
         <p id="hint"></p>

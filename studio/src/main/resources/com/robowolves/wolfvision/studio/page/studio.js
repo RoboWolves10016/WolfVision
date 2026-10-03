@@ -20,6 +20,8 @@ let status = { nodes: {} };
 let selected = null;
 /** The id of the Threshold node whose range is being picked from the image, or null. */
 let picking = null;
+/** How much the graph is magnified: 1 is full size. */
+let zoom = 1;
 let pushTimer = 0;
 let pushError = null;
 
@@ -85,8 +87,8 @@ function addNode(type) {
     type,
     params: {},
     in: spec.inputs.map(() => null),
-    x: canvas.scrollLeft + 40 + (graph.nodes.length % 5) * 24,
-    y: canvas.scrollTop + 40 + (graph.nodes.length % 5) * 24,
+    x: Math.round(canvas.scrollLeft / zoom) + 40 + (graph.nodes.length % 5) * 24,
+    y: Math.round(canvas.scrollTop / zoom) + 40 + (graph.nodes.length % 5) * 24,
   };
   graph.nodes.push(node);
   render();
@@ -194,11 +196,11 @@ function buildNode(node) {
 
 function dragNode(event, node, element) {
   event.preventDefault();
-  const startX = event.clientX - node.x;
-  const startY = event.clientY - node.y;
+  const startX = event.clientX / zoom - node.x;
+  const startY = event.clientY / zoom - node.y;
   const move = (e) => {
-    node.x = Math.max(0, e.clientX - startX);
-    node.y = Math.max(0, e.clientY - startY);
+    node.x = Math.max(0, Math.round(e.clientX / zoom - startX));
+    node.y = Math.max(0, Math.round(e.clientY / zoom - startY));
     element.style.left = node.x + "px";
     element.style.top = node.y + "px";
     drawWires();
@@ -297,6 +299,7 @@ function buildParams(node, container) {
     pick.addEventListener("click", (event) => {
       event.stopPropagation();
       picking = picking === node.id ? null : node.id;
+      if (picking) showPreview(true);
       select(node.id);
     });
     pick.addEventListener("pointerdown", (event) => event.stopPropagation());
@@ -309,7 +312,10 @@ function buildParams(node, container) {
 function dotCentre(dot) {
   const d = dot.getBoundingClientRect();
   const w = world.getBoundingClientRect();
-  return { x: d.left + d.width / 2 - w.left, y: d.top + d.height / 2 - w.top };
+  return {
+    x: (d.left + d.width / 2 - w.left) / zoom,
+    y: (d.top + d.height / 2 - w.top) / zoom,
+  };
 }
 
 function curve(a, b) {
@@ -352,7 +358,7 @@ function dragWire(event, source) {
   const from = dotCentre(event.currentTarget.querySelector("i"));
   const point = (e) => {
     const w = world.getBoundingClientRect();
-    return { x: e.clientX - w.left, y: e.clientY - w.top };
+    return { x: (e.clientX - w.left) / zoom, y: (e.clientY - w.top) / zoom };
   };
   const move = (e) => drawWires({ from, to: point(e) });
   const up = (e) => {
@@ -400,6 +406,7 @@ function pollImage(image, nodeId, width, gap) {
 
 /** The node whose picture the viewer shows: while picking, the input of the node being tuned. */
 function viewedNode() {
+  if ($("aside").hidden) return null;
   if (picking) {
     const node = nodeById(picking);
     return node ? node.in[0] : null;
@@ -506,6 +513,70 @@ function showResults() {
   if (!results.children.length) results.append(make("div", "", "Add an Output node."));
 }
 
+// ---- Zoom and the preview panel ----
+
+/** Reads a setting this browser remembered, or returns null. */
+function recall(name) {
+  try {
+    return localStorage.getItem("wolfvision." + name);
+  } catch (error) {
+    return null;
+  }
+}
+
+function remember(name, value) {
+  try {
+    localStorage.setItem("wolfvision." + name, value);
+  } catch (error) {
+    // The setting is only a convenience.
+  }
+}
+
+/** Sets the magnification, keeping the point of the graph at (px, py) of the canvas in place. */
+function setZoom(next, px, py) {
+  const canvas = $("#canvas");
+  next = Math.max(0.25, Math.min(2, next));
+  if (px === undefined) {
+    px = canvas.clientWidth / 2;
+    py = canvas.clientHeight / 2;
+  }
+  const worldX = (canvas.scrollLeft + px) / zoom;
+  const worldY = (canvas.scrollTop + py) / zoom;
+  zoom = next;
+  world.style.transform = `scale(${zoom})`;
+  canvas.scrollLeft = worldX * zoom - px;
+  canvas.scrollTop = worldY * zoom - py;
+  $("#zoomReset").textContent = Math.round(zoom * 100) + "%";
+  remember("zoom", zoom);
+}
+
+$("#zoomIn").addEventListener("click", () => setZoom(zoom * 1.25));
+$("#zoomOut").addEventListener("click", () => setZoom(zoom / 1.25));
+$("#zoomReset").addEventListener("click", () => setZoom(1));
+$("#canvas").addEventListener(
+  "wheel",
+  (event) => {
+    // A pinch on a trackpad arrives as a wheel event with the control key set.
+    if (!event.ctrlKey && !event.metaKey) return;
+    event.preventDefault();
+    const box = $("#canvas").getBoundingClientRect();
+    setZoom(
+      zoom * Math.exp(-event.deltaY * 0.01),
+      event.clientX - box.left,
+      event.clientY - box.top,
+    );
+  },
+  { passive: false },
+);
+
+function showPreview(shown) {
+  $("aside").hidden = !shown;
+  $("#togglePreview").classList.toggle("active", shown);
+  remember("preview", shown ? "1" : "0");
+}
+
+$("#togglePreview").addEventListener("click", () => showPreview($("aside").hidden));
+
 // ---- Toolbar ----
 
 $("#save").addEventListener("click", async () => {
@@ -571,6 +642,8 @@ async function start() {
     }
   }
   load(await api("/api/graph"));
+  showPreview(recall("preview") === "1");
+  setZoom(Number(recall("zoom")) || 1);
   pollImage(viewer, viewedNode, 800, 50);
   pollStatus();
 }

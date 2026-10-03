@@ -91,6 +91,21 @@ header a:hover {
   border-color: var(--accent);
 }
 
+.zoom {
+  display: flex;
+  gap: 2px;
+}
+
+#zoomReset {
+  min-width: 52px;
+  font-variant-numeric: tabular-nums;
+}
+
+#togglePreview.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 #banner {
   padding: 6px 12px;
   background: #4a2226;
@@ -130,6 +145,7 @@ main {
   height: 2200px;
   background-image: radial-gradient(var(--line) 1px, transparent 1px);
   background-size: 24px 24px;
+  transform-origin: 0 0;
 }
 
 #wires {
