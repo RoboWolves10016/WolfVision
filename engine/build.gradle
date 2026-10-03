@@ -1,0 +1,18 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    // Provided by the FTC robot controller app on a robot, and by the desktop module on a laptop.
+    compileOnly "org.openpnp:opencv:$opencvVersion"
+    compileOnly "com.google.code.gson:gson:$gsonVersion"
+
+    testImplementation "org.openpnp:opencv:$opencvVersion"
+    testImplementation "com.google.code.gson:gson:$gsonVersion"
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}

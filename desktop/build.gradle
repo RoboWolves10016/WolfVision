@@ -1,0 +1,19 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'application'
+}
+
+dependencies {
+    implementation project(':studio')
+    implementation "org.openpnp:opencv:$opencvVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "org.nanohttpd:nanohttpd:$nanohttpdVersion"
+}
+
+application {
+    mainClass = 'com.robowolves.wolfvision.desktop.MainKt'
+}
+
+run {
+    args rootProject.file('desktop/data.nosync/pipeline.json').path, 'demo'
+}

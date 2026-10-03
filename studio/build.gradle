@@ -1,0 +1,11 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+dependencies {
+    api project(':engine')
+    // Provided by the FTC robot controller app on a robot, and by the desktop module on a laptop.
+    compileOnly "org.openpnp:opencv:$opencvVersion"
+    compileOnly "com.google.code.gson:gson:$gsonVersion"
+    compileOnly "org.nanohttpd:nanohttpd:$nanohttpdVersion"
+}

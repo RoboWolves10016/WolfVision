@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'WolfVision'
+
+include ':engine'  // Pipeline graphs, nodes and the runtime. Plain Kotlin and OpenCV.
+include ':studio'  // Optional tuning dashboard: a web server and the editor page.
+include ':desktop' // Runs a pipeline and the studio on a laptop. Not published.

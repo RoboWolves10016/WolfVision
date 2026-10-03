@@ -1,0 +1,9 @@
+.gradle/
+.kotlin/
+.idea/
+*.iml
+build/
+build.nosync/
+data.nosync/
+local.properties
+.DS_Store
