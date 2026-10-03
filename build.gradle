@@ -6,8 +6,10 @@ plugins {
 }
 
 ext {
-    // The versions the FTC robot controller app provides at run time.
+    // OpenCV for the laptop. A robot uses the OpenCV of the FTC SDK instead (4.10 in SDK 12), so
+    // only calls that both have are used.
     opencvVersion = '4.7.0-0'
+    // The versions the FTC robot controller app provides at run time.
     gsonVersion = '2.8.0'
     nanohttpdVersion = '2.3.1'
     ftcVersion = '12.0.0'
